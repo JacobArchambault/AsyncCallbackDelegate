@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
 using System.Runtime.Remoting.Messaging;
+using static System.Console;
+using static System.Threading.Thread;
 
 namespace AsyncCallbackDelegate
 {
@@ -12,11 +11,10 @@ namespace AsyncCallbackDelegate
     {
         private static bool isDone = false;
 
-        static void Main(string[] args)
+        static void Main()
         {
-            Console.WriteLine("*****  AsyncCallbackDelegate Example *****");
-            Console.WriteLine("Main() invoked on thread {0}.",
-              Thread.CurrentThread.ManagedThreadId);
+            WriteLine("*****  AsyncCallbackDelegate Example *****");
+            WriteLine($"Main() invoked on thread {CurrentThread.ManagedThreadId}.");
 
             BinaryOp b = new BinaryOp(Add);
             IAsyncResult ar = b.BeginInvoke(10, 10,
@@ -26,44 +24,39 @@ namespace AsyncCallbackDelegate
             // Assume other work is performed here...
             while (!isDone)
             {
-                Thread.Sleep(1000);
-                Console.WriteLine("Working....");
+                Sleep(1000);
+                WriteLine("Working....");
             }
 
-            Console.ReadLine();
+            ReadLine();
         }
 
-        #region Target for AsyncCallback delegate
+        // Target for AsyncCallback delegate
         // Don't forget to add a 'using' directive for 
         // System.Runtime.Remoting.Messaging!
         static void AddComplete(IAsyncResult iar)
         {
-            Console.WriteLine("AddComplete() invoked on thread {0}.",
-              Thread.CurrentThread.ManagedThreadId);
-            Console.WriteLine("Your addition is complete");
+            WriteLine($"AddComplete() invoked on thread {CurrentThread.ManagedThreadId}.");
+            WriteLine("Your addition is complete");
 
             // Now get the result.
             AsyncResult ar = (AsyncResult)iar;
             BinaryOp b = (BinaryOp)ar.AsyncDelegate;
-            Console.WriteLine("10 + 10 is {0}.", b.EndInvoke(iar));
+            WriteLine($"10 + 10 is {b.EndInvoke(iar)}.");
 
             // Retrieve the informational object and cast it to string.
             string msg = (string)iar.AsyncState;
-            Console.WriteLine(msg);
+            WriteLine(msg);
 
             isDone = true;
         }
 
-        #endregion
-
-        #region Target for BinaryOp delegate
+        //Target for BinaryOp delegate
         static int Add(int x, int y)
         {
-            Console.WriteLine("Add() invoked on thread {0}.",
-              Thread.CurrentThread.ManagedThreadId);
-            Thread.Sleep(5000);
+            WriteLine($"Add() invoked on thread {CurrentThread.ManagedThreadId}.");
+            Sleep(5000);
             return x + y;
         }
-        #endregion
     }
 }
